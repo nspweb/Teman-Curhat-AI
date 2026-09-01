@@ -4,6 +4,16 @@ from google import genai
 from google.genai import types
 from datetime import datetime
 
+# ----------------------------------------------------------------------------
+# API KEY — diambil dari server (Streamlit Secrets / env var), TIDAK dari UI
+# ----------------------------------------------------------------------------
+# Cara pakai:
+# 1) Lokal: buat file .streamlit/secrets.toml berisi:
+#        GEMINI_API_KEY = "isi-api-key-kamu"
+# 2) Saat deploy di Streamlit Community Cloud: buka menu app -> Settings -> Secrets,
+#    lalu isi baris yang sama di sana. Key ini terenkripsi di server dan TIDAK
+#    pernah dikirim ke browser/client, jadi tidak akan pernah muncul di sidebar
+#    atau bisa dilihat lewat "View Page Source".
 API_KEY = st.secrets.get("GEMINI_API_KEY", os.environ.get("GEMINI_API_KEY", ""))
 
 
@@ -258,6 +268,13 @@ if user_input:
                     config=types.GenerateContentConfig(
                         system_instruction=SYSTEM_PROMPT,
                         max_output_tokens=512,  # jawaban chat singkat -> lebih cepat selesai
+                        thinking_config=types.ThinkingConfig(
+                            thinking_level=types.ThinkingLevel.LOW,
+                            # LOW = model tidak "mikir panjang" sebelum jawab.
+                            # Default model ini sebenarnya MEDIUM, yang menambah
+                            # waktu tunggu sebelum kata pertama muncul — cocok untuk
+                            # coding/tugas kompleks, tapi berlebihan untuk chat santai.
+                        ),
                     ),
                 )
 
